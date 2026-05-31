@@ -1,0 +1,9 @@
+:root {
+  --color-primary: #3F3F46;
+  --color-secondary: #D97706;
+  --color-accent: #B45309;
+  --color-bg: #FAFAF9;
+  --color-text: #1C1917;
+  --font-display: "Barlow", system-ui, sans-serif;
+  --font-body: "Source Sans 3", system-ui, sans-serif;
+}

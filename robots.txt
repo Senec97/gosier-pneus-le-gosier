@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gosier-pneus-le-gosier.pages.dev/sitemap.xml
