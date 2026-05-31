@@ -64,88 +64,33 @@ if (!prefersReducedMotion) {
   }
 }
 
-/* ── GSAP micro-interactions ── */
-function initGsap() {
-  if (typeof gsap === 'undefined' || prefersReducedMotion) return;
-
-  /* Hero headline entrance */
-  const heroEyebrow = document.querySelector('.hero-eyebrow');
-  const heroH1      = document.querySelector('.hero-content h1');
-  const heroP       = document.querySelector('.hero-content p');
-  const heroActions = document.querySelector('.hero-actions');
-
-  if (heroH1) {
-    gsap.from([heroEyebrow, heroH1, heroP, heroActions].filter(Boolean), {
-      y: 36,
-      opacity: 0,
-      duration: 0.85,
-      stagger: 0.14,
-      ease: 'power3.out',
-      delay: 0.25
-    });
-  }
-
-  /* Service card visual icon bounce */
-  document.querySelectorAll('.service-card-visual').forEach(el => {
-    const icon = el.querySelector('span, div');
-    if (!icon) return;
-    el.closest('.service-card')?.addEventListener('mouseenter', () => {
-      gsap.to(icon, { y: -6, duration: 0.25, ease: 'power2.out' });
-    });
-    el.closest('.service-card')?.addEventListener('mouseleave', () => {
-      gsap.to(icon, { y: 0, duration: 0.35, ease: 'elastic.out(1, 0.5)' });
-    });
-  });
-
-  /* CTA buttons scale on hover */
-  document.querySelectorAll('.btn').forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-      gsap.to(btn, { scale: 1.04, duration: 0.2, ease: 'power1.out' });
-    });
-    btn.addEventListener('mouseleave', () => {
-      gsap.to(btn, { scale: 1, duration: 0.2, ease: 'power1.out' });
-    });
-  });
-
-  /* Phone float pulse */
-  const phoneFloat = document.querySelector('.phone-float');
-  if (phoneFloat) {
-    gsap.to(phoneFloat, {
-      boxShadow: '0 4px 28px rgba(217,119,6,.75)',
-      yoyo: true,
-      repeat: -1,
-      duration: 1.5,
-      ease: 'sine.inOut'
-    });
-  }
-
-  /* Stat counter animation */
+/* ── Vanilla stat counter (rAF + IntersectionObserver) ── */
+if (!prefersReducedMotion) {
   document.querySelectorAll('.stat-item strong[data-count]').forEach(el => {
     const target = parseInt(el.dataset.count, 10);
     const suffix = el.dataset.suffix || '';
+    const duration = 1400;
+    let fired = false;
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          gsap.from({ val: 0 }, {
-            val: target,
-            duration: 1.4,
-            ease: 'power2.out',
-            onUpdate: function() {
-              el.textContent = Math.round(this.targets()[0].val) + suffix;
-            }
-          });
+        if (entry.isIntersecting && !fired) {
+          fired = true;
           observer.unobserve(el);
+          let startTime = null;
+          function tick(ts) {
+            if (!startTime) startTime = ts;
+            const progress = Math.min((ts - startTime) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(eased * target) + suffix;
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
         }
       });
     }, { threshold: 0.5 });
     observer.observe(el);
   });
-}
-
-if (typeof gsap !== 'undefined') {
-  initGsap();
-} else {
-  window.addEventListener('load', initGsap);
 }
 
 /* ── Header scroll shadow ── */
